@@ -1,11 +1,9 @@
 # Lan House Byte 2000 - Checkpoint 1
 
-**Equipe:** \[NOME DA EQUIPE]
-
 ## Integrantes e módulos
 
 |Módulo|Integrante|Struct|
-|-|-|-|
+
 |1. Clientes|\[Alexander Guimarães Gallotti Moreira, 47364548]|`Cliente`|
 |2. Computadores|\[João Felipe Alves Silva, 48302422]|`Computador`|
 |3. Lanchonete / Produtos|\[Nicolas Bryan de Oliveira Camargo, 48070068]|`Produto`|
