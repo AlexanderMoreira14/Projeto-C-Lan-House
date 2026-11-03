@@ -3,7 +3,7 @@
 
 // ============================================================================
 // LAN HOUSE BYTE 2000 - CHECKPOINT 1
-// Equipe: [Alexander, Guilherme Henrique, Jo„o Felipe, Nicolas Bryan]
+// Equipe: [Alexander, Guilherme Henrique, Jo√£o Felipe, Nicolas Bryan]
 // ============================================================================
 
 // ============================================================================
@@ -15,8 +15,8 @@ struct Cliente {
     int idCliente;
     char nome[50];
     char telefone[20];
-    float saldoHoras; // horas compradas e ainda nao usadas
-    int ativo; // 1 = Ativo, 0 = Removido
+    float saldoHoras; 
+    int ativo; 
 };
 
 struct Cliente listaClientes[50];
@@ -25,10 +25,10 @@ int totalClientes = 0;
 // 2. Perspectiva do Integrante B: Computadores da Lan House
 struct Computador {
     int idComputador;
-    char descricao[40]; // exemplo: PC Gamer 01
-    float valorHora; // preco cobrado por hora de uso
-    int ocupado; // 1 = Em uso, 0 = Livre
-    int ativo; // 1 = Ativo, 0 = Removido
+    char descricao[40]; 
+    float valorHora; 
+    int ocupado; 
+    int ativo; 
 };
 
 struct Computador listaComputadores[50];
@@ -38,7 +38,7 @@ int totalComputadores = 0;
 struct Produto {
     int idProduto;
     char nome[40];
-    char categoria[20]; // exemplo: Bebida, Salgado
+    char categoria[20]; 
     float preco;
     int quantidadeEstoque;
 };
@@ -65,7 +65,7 @@ int totalSessoes = 0;
 
 // ----------------------------------------------------------------------------
 // FUNCAO COMUM DA EQUIPE: Cabecalho do sistema
-// Autor: [Integrante A - Alexander Guimar„es Gallotti Moreira, 47364548]
+// Autor: [Integrante A - Alexander Guimar√£es Gallotti Moreira, 47364548]
 // ----------------------------------------------------------------------------
 void exibirCabecalho() {
     printf("\n======================================================\n");
@@ -114,7 +114,7 @@ void moduloClientes() {
 
 // ----------------------------------------------------------------------------
 // MODULO 2: PERSPECTIVA DE COMPUTADORES
-// Autor: [Integrante B - Jo„o Felipe Alves Silva, 48302422]
+// Autor: [Integrante B - Jo√£o Felipe Alves Silva, 48302422]
 // ----------------------------------------------------------------------------
 void moduloComputadores() {
     int opcaoComputador;
@@ -237,7 +237,7 @@ void moduloSessoesRelatorios() {
 
 // ============================================================================
 // PARTE 3: FUNCAO PRINCIPAL (MAIN) - DESPACHANTE DE MENUS
-// Autor: [Integrante A - Alexander Guimar„es Gallotti Moreira, 47364548]
+// Autor: [Integrante A - Alexander Guimar√£es Gallotti Moreira, 47364548]
 // ============================================================================
 int main() {
     int opcaoPrincipal;
