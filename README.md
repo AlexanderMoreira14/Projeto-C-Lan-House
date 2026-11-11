@@ -1,24 +1,27 @@
-# Lan House Byte 2000 - Checkpoint 1
+# Lan House Byte 2000 - Checkpoint 2
+
+**Disciplina:** Algoritmos e Pensamento Computacional
 
 ## Integrantes e módulos
 
-|Módulo|Integrante|Struct|
+|Módulo|Integrante|Arquivo|Struct|Arquivo de dados|
+|-|-|-|-|-|
+|1. Clientes|Alexander Guimarães Gallotti Moreira, 47364548|`clientes.h`|`Cliente`|`clientes.txt`|
+|2. Computadores|João Felipe Alves Silva, 48302422|`computadores.h`|`Computador`|`computadores.txt`|
+|3. Lanchonete / Produtos|Nicolas Bryan de Oliveira Camargo, 48070068|`produtos.h`|`Produto`|`produtos.txt`|
+|4. Sessões e Relatórios|Guilherme Henrique Bueno, 47290391|`sessoes.h`|`Sessao`|`sessoes.txt`|
 
-|1. Clientes|\[Alexander Guimarães Gallotti Moreira, 47364548]|`Cliente`|
-|2. Computadores|\[João Felipe Alves Silva, 48302422]|`Computador`|
-|3. Lanchonete / Produtos|\[Nicolas Bryan de Oliveira Camargo, 48070068]|`Produto`|
-|4. Sessões e Relatórios|\[Guilherme Henrique Bueno, 47290391]|`Sessao`|
+## O que está pronto
 
-## O que já está pronto
-
-* Uma struct por integrante no escopo global, com pelo menos 4 campos e seu vetor global de 50 posições.
-* Menu principal em `do-while` com `switch-case`, que abre os 4 submenus e permite voltar digitando 0.
-* Cada submenu tem as opções Cadastrar, Listar/Buscar, Editar e Remover. O módulo 4 também tem as opções de relatórios.
-* Funções separadas fora do `main()`, cada uma identificada com `// Autor:`.
-
-As rotinas dos submenus ainda estão marcadas como `\\\\\\\[Em construcao]`. Elas serão feitas nos próximos checkpoints.
+* **Cadastro, listagem, busca, edição e remoção** em funções separadas, em todos os módulos.
+* **Relatórios (Módulo 4):** computador mais utilizado, cliente VIP e sessões de um cliente específico.
+* **Ordenação (Bubble Sort):** clientes por nome, computadores por valor da hora, produtos por preço e sessões por valor.
+* **Divisão em módulos (.h):** cada integrante tem seu próprio arquivo `.h` com a struct, o vetor global e as funções do seu módulo.
+* **Arquivos (FILE \*):** cada módulo tem `salvar...()` e `carregar...()`.
+  * Ao abrir o programa, o `main()` carrega os 4 arquivos `.txt` (se existirem).
+  * Ao voltar de um submenu para o menu principal (opção 0), os dados daquele módulo são salvos no `.txt`.
 
 ## Como executar
 
-Abra o arquivo `main.c` no Dev-C++ e pressione F11 para compilar e executar.
-
+Deixe o `main.c` e os 4 arquivos `.h` na **mesma pasta**. Abra o `main.c` no Dev-C++ e pressione F11.
+Os arquivos `.txt` são criados sozinhos na mesma pasta, na primeira vez que você sair de um submenu.
