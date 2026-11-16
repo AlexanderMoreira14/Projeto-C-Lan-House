@@ -56,10 +56,21 @@ void cadastrarProduto() {
         scanf(" %[^\n]", estoqueProdutos[totalProdutos].nome);
         printf("Categoria (ex: Bebida, Salgado, Doce): ");
         scanf(" %[^\n]", estoqueProdutos[totalProdutos].categoria);
-        printf("Preco (ex: 4.50): ");
-        scanf("%f", &estoqueProdutos[totalProdutos].preco);
-        printf("Quantidade em estoque: ");
-        scanf("%d", &estoqueProdutos[totalProdutos].quantidadeEstoque);
+        // VALIDACAO: repete a pergunta ate digitar um preco maior que zero
+        do {
+            printf("Preco (ex: 4,50): ");
+            estoqueProdutos[totalProdutos].preco = -1; // comeca invalido: se digitarem letra, pergunta de novo
+            scanf("%f", &estoqueProdutos[totalProdutos].preco);
+            while (getchar() != '\n') { } // joga fora o que sobrou digitado
+        } while (estoqueProdutos[totalProdutos].preco <= 0);
+
+        // VALIDACAO: o estoque nao pode ser negativo
+        do {
+            printf("Quantidade em estoque: ");
+            estoqueProdutos[totalProdutos].quantidadeEstoque = -1;
+            scanf("%d", &estoqueProdutos[totalProdutos].quantidadeEstoque);
+            while (getchar() != '\n') { }
+        } while (estoqueProdutos[totalProdutos].quantidadeEstoque < 0);
 
         printf("\nProduto cadastrado com sucesso! ID gerado: %d\n", estoqueProdutos[totalProdutos].idProduto);
         totalProdutos++;
@@ -107,6 +118,80 @@ void buscarProduto() {
         printf("Categoria: %s\n", estoqueProdutos[indice].categoria);
         printf("Preco: R$ %.2f\n", estoqueProdutos[indice].preco);
         printf("Estoque: %d unidades\n", estoqueProdutos[indice].quantidadeEstoque);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// BUSCA TEXTUAL: mostra todos os produtos que tem o texto digitado no nome.
+// Exemplo: digitando "Coca" aparecem "Coca-Cola Lata" e "Coca-Cola 600ml".
+// Autor: [Integrante C - Nicolas Bryan]
+// ----------------------------------------------------------------------------
+void buscarProdutoPorNome() {
+    char texto[40];
+    int i;
+    int encontrou = 0;
+
+    printf("\nDigite o nome ou parte do nome: ");
+    scanf(" %[^\n]", texto);
+
+    printf("\n--- RESULTADO DA BUSCA ---\n");
+    for (i = 0; i < totalProdutos; i++) {
+        // strstr procura o texto dentro do nome: devolve NULL se nao encontrar
+        if (strstr(estoqueProdutos[i].nome, texto) != NULL) {
+            printf("ID: %d | %s | Categoria: %s | R$ %.2f | Estoque: %d\n",
+                   estoqueProdutos[i].idProduto, estoqueProdutos[i].nome,
+                   estoqueProdutos[i].categoria, estoqueProdutos[i].preco,
+                   estoqueProdutos[i].quantidadeEstoque);
+            encontrou = 1;
+        }
+    }
+    if (encontrou == 0) {
+        printf("Nenhum produto encontrado com \"%s\" no nome.\n", texto);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// VENDA: cruza um Cliente (Modulo 1) com um Produto, calcula o total
+// e da baixa no estoque.
+// Autor: [Integrante C - Nicolas Bryan]
+// ----------------------------------------------------------------------------
+void venderProduto() {
+    int idCliente, idProduto, quantidade;
+    int indiceCliente, indiceProduto;
+    float valor;
+
+    printf("\nID do cliente: ");
+    scanf("%d", &idCliente);
+    indiceCliente = buscarIndiceCliente(idCliente); // funcao do Modulo 1
+
+    printf("ID do produto: ");
+    scanf("%d", &idProduto);
+    indiceProduto = buscarIndiceProduto(idProduto);
+
+    if (indiceCliente == -1) {
+        printf("\n[ERRO] Cliente nao encontrado! Cadastre o cliente no Modulo 1.\n");
+    } else if (indiceProduto == -1) {
+        printf("\n[ERRO] Produto nao encontrado!\n");
+    } else {
+        printf("Quantidade: ");
+        scanf("%d", &quantidade);
+
+        if (quantidade <= 0) {
+            printf("\n[ERRO] A quantidade precisa ser maior que zero!\n");
+        } else if (quantidade > estoqueProdutos[indiceProduto].quantidadeEstoque) {
+            printf("\n[ERRO] Estoque insuficiente! Disponivel: %d unidades\n",
+                   estoqueProdutos[indiceProduto].quantidadeEstoque);
+        } else {
+            // BAIXA NO ESTOQUE: tira do estoque a quantidade vendida
+            estoqueProdutos[indiceProduto].quantidadeEstoque = estoqueProdutos[indiceProduto].quantidadeEstoque - quantidade;
+            valor = quantidade * estoqueProdutos[indiceProduto].preco;
+
+            printf("\nVenda realizada com sucesso!\n");
+            printf("Cliente: %s | %d x %s | Total: R$ %.2f\n",
+                   listaClientes[indiceCliente].nome, quantidade,
+                   estoqueProdutos[indiceProduto].nome, valor);
+            printf("Estoque restante: %d unidades\n", estoqueProdutos[indiceProduto].quantidadeEstoque);
+        }
     }
 }
 
@@ -182,60 +267,63 @@ void ordenarProdutosPorPreco() {
 }
 
 // ----------------------------------------------------------------------------
-// ARQUIVO: salva todos os dados do modulo no arquivo produtos.txt
-// Formato: 1a linha = quantidade, 2a linha = proximo ID,
-// depois cada campo de cada registro em uma linha.
+// ARQUIVO: grava o vetor inteiro no arquivo produtos.csv
+// Formato: um produto por linha, campos separados por ;
+// Exemplo de linha: 1;Coca-Cola Lata;Bebida;6,00;24
+// E chamada depois de cadastrar, editar, remover ou vender, para o arquivo
+// ficar sempre igual ao que esta na memoria.
 // Autor: [Integrante C - Nicolas Bryan]
 // ----------------------------------------------------------------------------
 void salvarProdutos() {
     FILE *arquivo; // ponteiro que representa o arquivo aberto
     int i;
 
-    arquivo = fopen("produtos.txt", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
+    arquivo = fopen("produtos.csv", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
 
     if (arquivo == NULL) {
-        printf("\n[ERRO] Nao foi possivel salvar o arquivo produtos.txt!\n");
+        printf("\n[ERRO] Nao foi possivel salvar o arquivo produtos.csv!\n");
     } else {
-        fprintf(arquivo, "%d\n", totalProdutos);
-        fprintf(arquivo, "%d\n", proximoIdProduto);
         for (i = 0; i < totalProdutos; i++) {
-            fprintf(arquivo, "%d\n", estoqueProdutos[i].idProduto);
-            fprintf(arquivo, "%s\n", estoqueProdutos[i].nome);
-            fprintf(arquivo, "%s\n", estoqueProdutos[i].categoria);
-            fprintf(arquivo, "%.2f\n", estoqueProdutos[i].preco);
-            fprintf(arquivo, "%d\n", estoqueProdutos[i].quantidadeEstoque);
+            fprintf(arquivo, "%d;%s;%s;%.2f;%d\n",
+                    estoqueProdutos[i].idProduto, estoqueProdutos[i].nome,
+                    estoqueProdutos[i].categoria, estoqueProdutos[i].preco,
+                    estoqueProdutos[i].quantidadeEstoque);
         }
         fclose(arquivo); // sempre fechar o arquivo depois de usar
-        printf("\nDados salvos no arquivo produtos.txt\n");
+        printf("Dados salvos no arquivo produtos.csv\n");
     }
 }
 
 // ----------------------------------------------------------------------------
-// ARQUIVO: le o arquivo produtos.txt e coloca os dados de volta no vetor.
+// ARQUIVO: le o arquivo produtos.csv e coloca os dados de volta no vetor.
 // E chamada uma vez, no inicio do main().
 // Autor: [Integrante C - Nicolas Bryan]
 // ----------------------------------------------------------------------------
 void carregarProdutos() {
     FILE *arquivo;
-    int i;
 
-    arquivo = fopen("produtos.txt", "r"); // "r" = leitura
+    arquivo = fopen("produtos.csv", "r"); // "r" = leitura
 
     if (arquivo == NULL) {
         // na primeira vez o arquivo ainda nao existe, entao o sistema comeca vazio
-        printf("Arquivo produtos.txt nao encontrado. Comecando sem dados.\n");
+        printf("Arquivo produtos.csv nao encontrado. Comecando sem dados.\n");
     } else {
-        fscanf(arquivo, "%d", &totalProdutos);
-        fscanf(arquivo, "%d", &proximoIdProduto);
-        for (i = 0; i < totalProdutos; i++) {
-            fscanf(arquivo, "%d", &estoqueProdutos[i].idProduto);
-            fscanf(arquivo, " %[^\n]", estoqueProdutos[i].nome);
-            fscanf(arquivo, " %[^\n]", estoqueProdutos[i].categoria);
-            fscanf(arquivo, "%f", &estoqueProdutos[i].preco);
-            fscanf(arquivo, "%d", &estoqueProdutos[i].quantidadeEstoque);
+        totalProdutos = 0;
+        // %[^;] = le tudo ate encontrar o ; (assim o nome pode ter espacos)
+        // o while para quando o fscanf nao consegue mais ler os 5 campos (fim do arquivo)
+        while (totalProdutos < 50 &&
+               fscanf(arquivo, "%d;%[^;];%[^;];%f;%d\n",
+                      &estoqueProdutos[totalProdutos].idProduto, estoqueProdutos[totalProdutos].nome,
+                      estoqueProdutos[totalProdutos].categoria, &estoqueProdutos[totalProdutos].preco,
+                      &estoqueProdutos[totalProdutos].quantidadeEstoque) == 5) {
+            // o proximo ID tem que ser maior que todos os IDs que ja existem
+            if (estoqueProdutos[totalProdutos].idProduto >= proximoIdProduto) {
+                proximoIdProduto = estoqueProdutos[totalProdutos].idProduto + 1;
+            }
+            totalProdutos++;
         }
         fclose(arquivo);
-        printf("%d produto(s) carregado(s) do arquivo produtos.txt\n", totalProdutos);
+        printf("%d produto(s) carregado(s) do arquivo produtos.csv\n", totalProdutos);
     }
 }
 
@@ -253,6 +341,8 @@ void moduloProdutos() {
         printf("4. Remover Produto\n");
         printf("5. Buscar Produto por ID\n");
         printf("6. [ORDENACAO] Listar Produtos por Preco\n");
+        printf("7. Buscar Produto por Nome\n");
+        printf("8. Vender Produto (Cruza Cliente + Produto e da Baixa no Estoque)\n");
         printf("0. Voltar ao Menu Principal\n");
         printf("Escolha uma acao: ");
         opcaoProduto = -1; // comeca invalida: se digitarem uma letra, cai no default
@@ -262,21 +352,31 @@ void moduloProdutos() {
         switch (opcaoProduto) {
             case 1:
                 cadastrarProduto();
+                salvarProdutos(); // atualiza o .csv na hora
                 break;
             case 2:
                 listarProdutos();
                 break;
             case 3:
                 editarProduto();
+                salvarProdutos(); // atualiza o .csv na hora
                 break;
             case 4:
                 removerProduto();
+                salvarProdutos(); // atualiza o .csv na hora
                 break;
             case 5:
                 buscarProduto();
                 break;
             case 6:
                 ordenarProdutosPorPreco();
+                break;
+            case 7:
+                buscarProdutoPorNome();
+                break;
+            case 8:
+                venderProduto();
+                salvarProdutos(); // grava o estoque novo no .csv
                 break;
             case 0:
                 salvarProdutos(); // grava os dados no arquivo antes de sair do modulo

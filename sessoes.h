@@ -67,7 +67,9 @@ void registrarSessao() {
             // repete a pergunta ate o usuario digitar um tempo maior que zero
             do {
                 printf("Minutos usados: ");
+                minutos = -1; // comeca invalido: se digitarem letra, pergunta de novo
                 scanf("%d", &minutos);
+                while (getchar() != '\n') { } // joga fora o que sobrou digitado
             } while (minutos <= 0);
 
             // usamos 60.0 (e nao 60) para a divisao ter casas decimais
@@ -234,6 +236,86 @@ void relatorioSessoesPorCliente() {
 }
 
 // ----------------------------------------------------------------------------
+// RELATORIO COM MATRIZ 2D: minutos de uso de cada cliente em cada computador.
+// Linha = cliente, coluna = computador, cada celula = soma dos minutos.
+// Autor: [Integrante D - Guilherme Henrique]
+// ----------------------------------------------------------------------------
+void relatorioMatrizDeUso() {
+    int matriz[50][50]; // [linha = posicao do cliente][coluna = posicao do computador]
+    int i, j, k;
+
+    // 1o passo: zera todas as celulas da matriz
+    for (i = 0; i < totalClientes; i++) {
+        for (j = 0; j < totalComputadores; j++) {
+            matriz[i][j] = 0;
+        }
+    }
+
+    // 2o passo: cada sessao soma seus minutos na celula [cliente][computador]
+    for (k = 0; k < totalSessoes; k++) {
+        i = buscarIndiceCliente(historicoSessoes[k].idClienteSessao);       // linha
+        j = buscarIndiceComputador(historicoSessoes[k].idComputadorSessao); // coluna
+        if (i != -1 && j != -1) {
+            matriz[i][j] = matriz[i][j] + historicoSessoes[k].minutosUsados;
+        }
+    }
+
+    // 3o passo: mostra a matriz em forma de tabela
+    printf("\n--- RELATORIO: MATRIZ DE USO (minutos por cliente x computador) ---\n");
+    // %7d = escreve o numero ocupando 7 espacos, assim as colunas ficam alinhadas
+    printf("Cliente     ");
+    for (j = 0; j < totalComputadores; j++) {
+        if (listaComputadores[j].ativo == 1) {
+            printf("   PC%2d", listaComputadores[j].idComputador);
+        }
+    }
+    printf("\n");
+
+    for (i = 0; i < totalClientes; i++) {
+        if (listaClientes[i].ativo == 1) {
+            printf("ID %2d       ", listaClientes[i].idCliente);
+            for (j = 0; j < totalComputadores; j++) {
+                if (listaComputadores[j].ativo == 1) {
+                    printf("%7d", matriz[i][j]);
+                }
+            }
+            printf("\n");
+        }
+    }
+}
+
+// ----------------------------------------------------------------------------
+// BUSCA TEXTUAL: mostra as sessoes dos clientes que tem o texto no nome.
+// Cruza o Modulo 1 (nome do cliente) com o historico de sessoes.
+// Autor: [Integrante D - Guilherme Henrique]
+// ----------------------------------------------------------------------------
+void buscarSessoesPorNomeCliente() {
+    char texto[50];
+    int i;
+    int indiceCliente;
+    int encontrou = 0;
+
+    printf("\nDigite o nome do cliente ou parte do nome: ");
+    scanf(" %[^\n]", texto);
+
+    printf("\n--- RESULTADO DA BUSCA ---\n");
+    for (i = 0; i < totalSessoes; i++) {
+        indiceCliente = buscarIndiceCliente(historicoSessoes[i].idClienteSessao); // funcao do Modulo 1
+        // strstr procura o texto dentro do nome: devolve NULL se nao encontrar
+        if (indiceCliente != -1 && strstr(listaClientes[indiceCliente].nome, texto) != NULL) {
+            printf("Sessao %d | Cliente: %s | ID Computador: %d | %d minutos | R$ %.2f\n",
+                   historicoSessoes[i].idSessao, listaClientes[indiceCliente].nome,
+                   historicoSessoes[i].idComputadorSessao, historicoSessoes[i].minutosUsados,
+                   historicoSessoes[i].valorTotal);
+            encontrou = 1;
+        }
+    }
+    if (encontrou == 0) {
+        printf("Nenhuma sessao encontrada para clientes com \"%s\" no nome.\n", texto);
+    }
+}
+
+// ----------------------------------------------------------------------------
 // ORDENACAO: coloca as sessoes da mais cara para a mais barata (Bubble Sort).
 // Autor: [Integrante D - Guilherme Henrique]
 // ----------------------------------------------------------------------------
@@ -256,60 +338,64 @@ void ordenarSessoesPorValor() {
 }
 
 // ----------------------------------------------------------------------------
-// ARQUIVO: salva todos os dados do modulo no arquivo sessoes.txt
-// Formato: 1a linha = quantidade, 2a linha = proximo ID,
-// depois cada campo de cada registro em uma linha.
+// ARQUIVO: grava o vetor inteiro no arquivo sessoes.csv
+// Formato: uma sessao por linha, campos separados por ;
+// Exemplo de linha: 1;3;2;90;12,00
+// E chamada depois de registrar ou cancelar, para o arquivo
+// ficar sempre igual ao que esta na memoria.
 // Autor: [Integrante D - Guilherme Henrique]
 // ----------------------------------------------------------------------------
 void salvarSessoes() {
     FILE *arquivo; // ponteiro que representa o arquivo aberto
     int i;
 
-    arquivo = fopen("sessoes.txt", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
+    arquivo = fopen("sessoes.csv", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
 
     if (arquivo == NULL) {
-        printf("\n[ERRO] Nao foi possivel salvar o arquivo sessoes.txt!\n");
+        printf("\n[ERRO] Nao foi possivel salvar o arquivo sessoes.csv!\n");
     } else {
-        fprintf(arquivo, "%d\n", totalSessoes);
-        fprintf(arquivo, "%d\n", proximoIdSessao);
         for (i = 0; i < totalSessoes; i++) {
-            fprintf(arquivo, "%d\n", historicoSessoes[i].idSessao);
-            fprintf(arquivo, "%d\n", historicoSessoes[i].idClienteSessao);
-            fprintf(arquivo, "%d\n", historicoSessoes[i].idComputadorSessao);
-            fprintf(arquivo, "%d\n", historicoSessoes[i].minutosUsados);
-            fprintf(arquivo, "%.2f\n", historicoSessoes[i].valorTotal);
+            fprintf(arquivo, "%d;%d;%d;%d;%.2f\n",
+                    historicoSessoes[i].idSessao, historicoSessoes[i].idClienteSessao,
+                    historicoSessoes[i].idComputadorSessao, historicoSessoes[i].minutosUsados,
+                    historicoSessoes[i].valorTotal);
         }
         fclose(arquivo); // sempre fechar o arquivo depois de usar
-        printf("\nDados salvos no arquivo sessoes.txt\n");
+        printf("Dados salvos no arquivo sessoes.csv\n");
     }
 }
 
 // ----------------------------------------------------------------------------
-// ARQUIVO: le o arquivo sessoes.txt e coloca os dados de volta no vetor.
+// ARQUIVO: le o arquivo sessoes.csv e coloca os dados de volta no vetor.
 // E chamada uma vez, no inicio do main().
 // Autor: [Integrante D - Guilherme Henrique]
 // ----------------------------------------------------------------------------
 void carregarSessoes() {
     FILE *arquivo;
-    int i;
 
-    arquivo = fopen("sessoes.txt", "r"); // "r" = leitura
+    arquivo = fopen("sessoes.csv", "r"); // "r" = leitura
 
     if (arquivo == NULL) {
         // na primeira vez o arquivo ainda nao existe, entao o sistema comeca vazio
-        printf("Arquivo sessoes.txt nao encontrado. Comecando sem dados.\n");
+        printf("Arquivo sessoes.csv nao encontrado. Comecando sem dados.\n");
     } else {
-        fscanf(arquivo, "%d", &totalSessoes);
-        fscanf(arquivo, "%d", &proximoIdSessao);
-        for (i = 0; i < totalSessoes; i++) {
-            fscanf(arquivo, "%d", &historicoSessoes[i].idSessao);
-            fscanf(arquivo, "%d", &historicoSessoes[i].idClienteSessao);
-            fscanf(arquivo, "%d", &historicoSessoes[i].idComputadorSessao);
-            fscanf(arquivo, "%d", &historicoSessoes[i].minutosUsados);
-            fscanf(arquivo, "%f", &historicoSessoes[i].valorTotal);
+        totalSessoes = 0;
+        // o while para quando o fscanf nao consegue mais ler os 5 campos (fim do arquivo)
+        while (totalSessoes < 50 &&
+               fscanf(arquivo, "%d;%d;%d;%d;%f\n",
+                      &historicoSessoes[totalSessoes].idSessao,
+                      &historicoSessoes[totalSessoes].idClienteSessao,
+                      &historicoSessoes[totalSessoes].idComputadorSessao,
+                      &historicoSessoes[totalSessoes].minutosUsados,
+                      &historicoSessoes[totalSessoes].valorTotal) == 5) {
+            // o proximo ID tem que ser maior que todos os IDs que ja existem
+            if (historicoSessoes[totalSessoes].idSessao >= proximoIdSessao) {
+                proximoIdSessao = historicoSessoes[totalSessoes].idSessao + 1;
+            }
+            totalSessoes++;
         }
         fclose(arquivo);
-        printf("%d sessao(oes) carregada(s) do arquivo sessoes.txt\n", totalSessoes);
+        printf("%d sessao(oes) carregada(s) do arquivo sessoes.csv\n", totalSessoes);
     }
 }
 
@@ -328,6 +414,8 @@ void moduloSessoesRelatorios() {
         printf("5. [RELATORIO] Cliente VIP (Maior Tempo de Uso)\n");
         printf("6. [RELATORIO] Sessoes de um Cliente Especifico\n");
         printf("7. [ORDENACAO] Listar Sessoes por Valor (Maior para Menor)\n");
+        printf("8. [RELATORIO] Matriz de Uso (Cliente x Computador)\n");
+        printf("9. Buscar Sessoes pelo Nome do Cliente\n");
         printf("0. Voltar ao Menu Principal\n");
         printf("Escolha uma acao: ");
         opcaoSessao = -1; // comeca invalida: se digitarem uma letra, cai no default
@@ -337,12 +425,14 @@ void moduloSessoesRelatorios() {
         switch (opcaoSessao) {
             case 1:
                 registrarSessao();
+                salvarSessoes(); // atualiza o .csv na hora
                 break;
             case 2:
                 listarSessoes();
                 break;
             case 3:
                 cancelarSessao();
+                salvarSessoes(); // atualiza o .csv na hora
                 break;
             case 4:
                 relatorioComputadorMaisUsado();
@@ -355,6 +445,12 @@ void moduloSessoesRelatorios() {
                 break;
             case 7:
                 ordenarSessoesPorValor();
+                break;
+            case 8:
+                relatorioMatrizDeUso();
+                break;
+            case 9:
+                buscarSessoesPorNomeCliente();
                 break;
             case 0:
                 salvarSessoes(); // grava os dados no arquivo antes de sair do modulo

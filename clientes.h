@@ -54,8 +54,13 @@ void cadastrarCliente() {
         scanf(" %[^\n]", listaClientes[totalClientes].nome); // le o nome com espacos
         printf("Telefone: ");
         scanf(" %[^\n]", listaClientes[totalClientes].telefone);
-        printf("Saldo inicial de horas (ex: 2.5): ");
-        scanf("%f", &listaClientes[totalClientes].saldoHoras);
+        // VALIDACAO: repete a pergunta ate digitar um saldo de 0 ou mais
+        do {
+            printf("Saldo inicial de horas (ex: 2,5): ");
+            listaClientes[totalClientes].saldoHoras = -1; // comeca invalido: se digitarem letra, pergunta de novo
+            scanf("%f", &listaClientes[totalClientes].saldoHoras);
+            while (getchar() != '\n') { } // joga fora o que sobrou digitado
+        } while (listaClientes[totalClientes].saldoHoras < 0);
         listaClientes[totalClientes].ativo = 1;
 
         printf("\nCliente cadastrado com sucesso! ID gerado: %d\n", listaClientes[totalClientes].idCliente);
@@ -105,6 +110,34 @@ void buscarCliente() {
         printf("Nome: %s\n", listaClientes[indice].nome);
         printf("Telefone: %s\n", listaClientes[indice].telefone);
         printf("Saldo de horas: %.1f\n", listaClientes[indice].saldoHoras);
+    }
+}
+
+// ----------------------------------------------------------------------------
+// BUSCA TEXTUAL: mostra todos os clientes que tem o texto digitado no nome.
+// Exemplo: digitando "Silva" aparecem "Ana Silva" e "Bruno Silva".
+// Autor: [Integrante A - Alexander]
+// ----------------------------------------------------------------------------
+void buscarClientePorNome() {
+    char texto[50];
+    int i;
+    int encontrou = 0;
+
+    printf("\nDigite o nome ou parte do nome: ");
+    scanf(" %[^\n]", texto);
+
+    printf("\n--- RESULTADO DA BUSCA ---\n");
+    for (i = 0; i < totalClientes; i++) {
+        // strstr procura o texto dentro do nome: devolve NULL se nao encontrar
+        if (listaClientes[i].ativo == 1 && strstr(listaClientes[i].nome, texto) != NULL) {
+            printf("ID: %d | Nome: %s | Telefone: %s | Saldo: %.1f horas\n",
+                   listaClientes[i].idCliente, listaClientes[i].nome,
+                   listaClientes[i].telefone, listaClientes[i].saldoHoras);
+            encontrou = 1;
+        }
+    }
+    if (encontrou == 0) {
+        printf("Nenhum cliente encontrado com \"%s\" no nome.\n", texto);
     }
 }
 
@@ -177,58 +210,60 @@ void ordenarClientesPorNome() {
 }
 
 // ----------------------------------------------------------------------------
-// ARQUIVO: salva todos os dados do modulo no arquivo clientes.txt
-// Formato: 1a linha = quantidade,
-// depois cada campo de cada registro em uma linha.
+// ARQUIVO: grava o vetor inteiro no arquivo clientes.csv
+// Formato: um cliente por linha, campos separados por ;
+// Exemplo de linha: 1;Ana Souza;11987654321;5,0;1
+// E chamada depois de cadastrar, editar ou remover, para o arquivo
+// ficar sempre igual ao que esta na memoria.
 // Autor: [Integrante A - Alexander]
 // ----------------------------------------------------------------------------
 void salvarClientes() {
     FILE *arquivo; // ponteiro que representa o arquivo aberto
     int i;
 
-    arquivo = fopen("clientes.txt", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
+    arquivo = fopen("clientes.csv", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
 
     if (arquivo == NULL) {
-        printf("\n[ERRO] Nao foi possivel salvar o arquivo clientes.txt!\n");
+        printf("\n[ERRO] Nao foi possivel salvar o arquivo clientes.csv!\n");
     } else {
-        fprintf(arquivo, "%d\n", totalClientes);
         for (i = 0; i < totalClientes; i++) {
-            fprintf(arquivo, "%d\n", listaClientes[i].idCliente);
-            fprintf(arquivo, "%s\n", listaClientes[i].nome);
-            fprintf(arquivo, "%s\n", listaClientes[i].telefone);
-            fprintf(arquivo, "%.2f\n", listaClientes[i].saldoHoras);
-            fprintf(arquivo, "%d\n", listaClientes[i].ativo);
+            fprintf(arquivo, "%d;%s;%s;%.1f;%d\n",
+                    listaClientes[i].idCliente, listaClientes[i].nome,
+                    listaClientes[i].telefone, listaClientes[i].saldoHoras,
+                    listaClientes[i].ativo);
         }
         fclose(arquivo); // sempre fechar o arquivo depois de usar
-        printf("\nDados salvos no arquivo clientes.txt\n");
+        printf("Dados salvos no arquivo clientes.csv\n");
     }
 }
 
 // ----------------------------------------------------------------------------
-// ARQUIVO: le o arquivo clientes.txt e coloca os dados de volta no vetor.
+// ARQUIVO: le o arquivo clientes.csv e coloca os dados de volta no vetor.
 // E chamada uma vez, no inicio do main().
 // Autor: [Integrante A - Alexander]
 // ----------------------------------------------------------------------------
 void carregarClientes() {
     FILE *arquivo;
-    int i;
 
-    arquivo = fopen("clientes.txt", "r"); // "r" = leitura
+    arquivo = fopen("clientes.csv", "r"); // "r" = leitura
 
     if (arquivo == NULL) {
         // na primeira vez o arquivo ainda nao existe, entao o sistema comeca vazio
-        printf("Arquivo clientes.txt nao encontrado. Comecando sem dados.\n");
+        printf("Arquivo clientes.csv nao encontrado. Comecando sem dados.\n");
     } else {
-        fscanf(arquivo, "%d", &totalClientes);
-        for (i = 0; i < totalClientes; i++) {
-            fscanf(arquivo, "%d", &listaClientes[i].idCliente);
-            fscanf(arquivo, " %[^\n]", listaClientes[i].nome);
-            fscanf(arquivo, " %[^\n]", listaClientes[i].telefone);
-            fscanf(arquivo, "%f", &listaClientes[i].saldoHoras);
-            fscanf(arquivo, "%d", &listaClientes[i].ativo);
+        totalClientes = 0;
+        // %[^;] = le tudo ate encontrar o ; (assim o nome pode ter espacos)
+        // o fscanf devolve quantos campos conseguiu ler: quando o arquivo
+        // acaba ele nao consegue ler os 5 campos e o while para
+        while (totalClientes < 50 &&
+               fscanf(arquivo, "%d;%[^;];%[^;];%f;%d\n",
+                      &listaClientes[totalClientes].idCliente, listaClientes[totalClientes].nome,
+                      listaClientes[totalClientes].telefone, &listaClientes[totalClientes].saldoHoras,
+                      &listaClientes[totalClientes].ativo) == 5) {
+            totalClientes++;
         }
         fclose(arquivo);
-        printf("%d cliente(s) carregado(s) do arquivo clientes.txt\n", totalClientes);
+        printf("%d cliente(s) carregado(s) do arquivo clientes.csv\n", totalClientes);
     }
 }
 
@@ -246,6 +281,7 @@ void moduloClientes() {
         printf("4. Remover Cliente\n");
         printf("5. Buscar Cliente por ID\n");
         printf("6. [ORDENACAO] Listar Clientes em Ordem Alfabetica\n");
+        printf("7. Buscar Cliente por Nome\n");
         printf("0. Voltar ao Menu Principal\n");
         printf("Escolha uma acao: ");
         opcaoCliente = -1; // comeca invalida: se digitarem uma letra, cai no default
@@ -255,21 +291,27 @@ void moduloClientes() {
         switch (opcaoCliente) {
             case 1:
                 cadastrarCliente();
+                salvarClientes(); // atualiza o .csv na hora
                 break;
             case 2:
                 listarClientes();
                 break;
             case 3:
                 editarCliente();
+                salvarClientes(); // atualiza o .csv na hora
                 break;
             case 4:
                 removerCliente();
+                salvarClientes(); // atualiza o .csv na hora
                 break;
             case 5:
                 buscarCliente();
                 break;
             case 6:
                 ordenarClientesPorNome();
+                break;
+            case 7:
+                buscarClientePorNome();
                 break;
             case 0:
                 salvarClientes(); // grava os dados no arquivo antes de sair do modulo

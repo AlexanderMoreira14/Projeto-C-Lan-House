@@ -1,11 +1,13 @@
 #include <stdio.h>
-#include <string.h>
+#include <stdlib.h>  // para usar system("cls") na limparTela()
+#include <string.h>  // para usar strcmp e strstr
+#include <locale.h>  // para usar setlocale (portugues: virgula nos numeros decimais)
 
 // ============================================================================
 // LAN HOUSE BYTE 2000 - CHECKPOINT 2
-// Cadastro, listagem, edicao, remocao, relatorios e ordenacao
+// Cadastro, listagem, busca, edicao, remocao, relatorios, ordenacao e matriz
 // Codigo dividido em modulos: um arquivo .h para cada integrante
-// Dados salvos em arquivos .txt (FILE *) para nao perder ao fechar
+// Dados salvos em arquivos .csv separados por ; (FILE *) para nao perder ao fechar
 // Equipe: [Alexander, Guilherme Henrique, João Felipe, Nicolas Bryan]
 // ============================================================================
 
@@ -23,8 +25,16 @@
 
 
 // ============================================================================
-// PARTE 2: FUNCAO COMUM DA EQUIPE
+// PARTE 2: FUNCOES COMUNS DA EQUIPE
 // ============================================================================
+
+// ----------------------------------------------------------------------------
+// FUNCAO COMUM DA EQUIPE: Limpa a tela do console
+// Autor: [Integrante A - Alexander Guimarães Gallotti Moreira, 47364548]
+// ----------------------------------------------------------------------------
+void limparTela() {
+    system("cls"); // "cls" e o comando do Windows que apaga tudo que esta na tela
+}
 
 // ----------------------------------------------------------------------------
 // FUNCAO COMUM DA EQUIPE: Cabecalho do sistema
@@ -44,7 +54,10 @@ void exibirCabecalho() {
 int main() {
     int opcaoPrincipal;
 
-    // carrega os dados salvos nos arquivos .txt (se existirem)
+    // deixa o programa em portugues: numeros decimais com virgula (ex: 5,50)
+    setlocale(LC_ALL, "Portuguese");
+
+    // carrega os dados salvos nos arquivos .csv (se existirem)
     carregarClientes();
     carregarComputadores();
     carregarProdutos();
@@ -66,15 +79,19 @@ int main() {
 
         switch (opcaoPrincipal) {
             case 1:
+                limparTela(); // limpa a tela antes de abrir o submenu
                 moduloClientes();
                 break;
             case 2:
+                limparTela();
                 moduloComputadores();
                 break;
             case 3:
+                limparTela();
                 moduloProdutos();
                 break;
             case 4:
+                limparTela();
                 moduloSessoesRelatorios();
                 break;
             case 0:
