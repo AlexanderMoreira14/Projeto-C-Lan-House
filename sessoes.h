@@ -19,7 +19,7 @@ struct Sessao {
 
 struct Sessao historicoSessoes[50];
 int totalSessoes = 0;
-int proximoIdSessao = 1; // proximo ID a ser usado (so aumenta, para nao repetir ID depois de cancelar)
+int proximoIdSessao = 1;
 
 
 // ----- FUNCOES DO MODULO -----
@@ -53,26 +53,24 @@ void registrarSessao() {
     } else {
         printf("\nID do cliente: ");
         scanf("%d", &idCliente);
-        indiceCliente = buscarIndiceCliente(idCliente); // funcao do Modulo 1
+        indiceCliente = buscarIndiceCliente(idCliente);
 
         printf("ID do computador: ");
         scanf("%d", &idComputador);
-        indiceComputador = buscarIndiceComputador(idComputador); // funcao do Modulo 2
+        indiceComputador = buscarIndiceComputador(idComputador);
 
         if (indiceCliente == -1) {
             printf("\n[ERRO] Cliente nao encontrado! Cadastre o cliente no Modulo 1.\n");
         } else if (indiceComputador == -1) {
             printf("\n[ERRO] Computador nao encontrado! Cadastre o computador no Modulo 2.\n");
         } else {
-            // repete a pergunta ate o usuario digitar um tempo maior que zero
             do {
                 printf("Minutos usados: ");
-                minutos = -1; // comeca invalido: se digitarem letra, pergunta de novo
+                minutos = -1;
                 scanf("%d", &minutos);
-                while (getchar() != '\n') { } // joga fora o que sobrou digitado
+                while (getchar() != '\n') { }
             } while (minutos <= 0);
 
-            // usamos 60.0 (e nao 60) para a divisao ter casas decimais
             valor = (minutos / 60.0) * listaComputadores[indiceComputador].valorHora;
 
             historicoSessoes[totalSessoes].idSessao = proximoIdSessao;
@@ -144,9 +142,8 @@ void relatorioComputadorMaisUsado() {
     int i, j;
     int somaMinutos;
     int maiorMinutos = 0;
-    int indiceMaior = -1; // -1 = ainda nao achou nenhum
+    int indiceMaior = -1;
 
-    // para cada computador, soma os minutos de todas as sessoes dele
     for (i = 0; i < totalComputadores; i++) {
         somaMinutos = 0;
         for (j = 0; j < totalSessoes; j++) {
@@ -154,7 +151,6 @@ void relatorioComputadorMaisUsado() {
                 somaMinutos = somaMinutos + historicoSessoes[j].minutosUsados;
             }
         }
-        // se esse computador passou o maior ate agora, ele vira o novo maior
         if (somaMinutos > maiorMinutos) {
             maiorMinutos = somaMinutos;
             indiceMaior = i;
@@ -241,28 +237,24 @@ void relatorioSessoesPorCliente() {
 // Autor: [Integrante D - Guilherme Henrique]
 // ----------------------------------------------------------------------------
 void relatorioMatrizDeUso() {
-    int matriz[50][50]; // [linha = posicao do cliente][coluna = posicao do computador]
+    int matriz[50][50];
     int i, j, k;
 
-    // 1o passo: zera todas as celulas da matriz
     for (i = 0; i < totalClientes; i++) {
         for (j = 0; j < totalComputadores; j++) {
             matriz[i][j] = 0;
         }
     }
 
-    // 2o passo: cada sessao soma seus minutos na celula [cliente][computador]
     for (k = 0; k < totalSessoes; k++) {
-        i = buscarIndiceCliente(historicoSessoes[k].idClienteSessao);       // linha
-        j = buscarIndiceComputador(historicoSessoes[k].idComputadorSessao); // coluna
+        i = buscarIndiceCliente(historicoSessoes[k].idClienteSessao);
+        j = buscarIndiceComputador(historicoSessoes[k].idComputadorSessao);
         if (i != -1 && j != -1) {
             matriz[i][j] = matriz[i][j] + historicoSessoes[k].minutosUsados;
         }
     }
 
-    // 3o passo: mostra a matriz em forma de tabela
     printf("\n--- RELATORIO: MATRIZ DE USO (minutos por cliente x computador) ---\n");
-    // %7d = escreve o numero ocupando 7 espacos, assim as colunas ficam alinhadas
     printf("Cliente     ");
     for (j = 0; j < totalComputadores; j++) {
         if (listaComputadores[j].ativo == 1) {
@@ -300,8 +292,7 @@ void buscarSessoesPorNomeCliente() {
 
     printf("\n--- RESULTADO DA BUSCA ---\n");
     for (i = 0; i < totalSessoes; i++) {
-        indiceCliente = buscarIndiceCliente(historicoSessoes[i].idClienteSessao); // funcao do Modulo 1
-        // strstr procura o texto dentro do nome: devolve NULL se nao encontrar
+        indiceCliente = buscarIndiceCliente(historicoSessoes[i].idClienteSessao);
         if (indiceCliente != -1 && strstr(listaClientes[indiceCliente].nome, texto) != NULL) {
             printf("Sessao %d | Cliente: %s | ID Computador: %d | %d minutos | R$ %.2f\n",
                    historicoSessoes[i].idSessao, listaClientes[indiceCliente].nome,
@@ -325,7 +316,6 @@ void ordenarSessoesPorValor() {
 
     for (i = 0; i < totalSessoes - 1; i++) {
         for (j = 0; j < totalSessoes - 1 - i; j++) {
-            // aqui o sinal e "<" porque queremos do MAIOR para o menor
             if (historicoSessoes[j].valorTotal < historicoSessoes[j + 1].valorTotal) {
                 aux = historicoSessoes[j];
                 historicoSessoes[j] = historicoSessoes[j + 1];
@@ -346,10 +336,10 @@ void ordenarSessoesPorValor() {
 // Autor: [Integrante D - Guilherme Henrique]
 // ----------------------------------------------------------------------------
 void salvarSessoes() {
-    FILE *arquivo; // ponteiro que representa o arquivo aberto
+    FILE *arquivo;
     int i;
 
-    arquivo = fopen("sessoes.csv", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
+    arquivo = fopen("sessoes.csv", "w");
 
     if (arquivo == NULL) {
         printf("\n[ERRO] Nao foi possivel salvar o arquivo sessoes.csv!\n");
@@ -360,7 +350,7 @@ void salvarSessoes() {
                     historicoSessoes[i].idComputadorSessao, historicoSessoes[i].minutosUsados,
                     historicoSessoes[i].valorTotal);
         }
-        fclose(arquivo); // sempre fechar o arquivo depois de usar
+        fclose(arquivo);
         printf("Dados salvos no arquivo sessoes.csv\n");
     }
 }
@@ -373,14 +363,12 @@ void salvarSessoes() {
 void carregarSessoes() {
     FILE *arquivo;
 
-    arquivo = fopen("sessoes.csv", "r"); // "r" = leitura
+    arquivo = fopen("sessoes.csv", "r");
 
     if (arquivo == NULL) {
-        // na primeira vez o arquivo ainda nao existe, entao o sistema comeca vazio
         printf("Arquivo sessoes.csv nao encontrado. Comecando sem dados.\n");
     } else {
         totalSessoes = 0;
-        // o while para quando o fscanf nao consegue mais ler os 5 campos (fim do arquivo)
         while (totalSessoes < 50 &&
                fscanf(arquivo, "%d;%d;%d;%d;%f\n",
                       &historicoSessoes[totalSessoes].idSessao,
@@ -388,7 +376,6 @@ void carregarSessoes() {
                       &historicoSessoes[totalSessoes].idComputadorSessao,
                       &historicoSessoes[totalSessoes].minutosUsados,
                       &historicoSessoes[totalSessoes].valorTotal) == 5) {
-            // o proximo ID tem que ser maior que todos os IDs que ja existem
             if (historicoSessoes[totalSessoes].idSessao >= proximoIdSessao) {
                 proximoIdSessao = historicoSessoes[totalSessoes].idSessao + 1;
             }
@@ -418,21 +405,21 @@ void moduloSessoesRelatorios() {
         printf("9. Buscar Sessoes pelo Nome do Cliente\n");
         printf("0. Voltar ao Menu Principal\n");
         printf("Escolha uma acao: ");
-        opcaoSessao = -1; // comeca invalida: se digitarem uma letra, cai no default
+        opcaoSessao = -1;
         scanf("%d", &opcaoSessao);
-        while (getchar() != '\n') { } // joga fora o que sobrou digitado (letras e o Enter)
+        while (getchar() != '\n') { }
 
         switch (opcaoSessao) {
             case 1:
                 registrarSessao();
-                salvarSessoes(); // atualiza o .csv na hora
+                salvarSessoes();
                 break;
             case 2:
                 listarSessoes();
                 break;
             case 3:
                 cancelarSessao();
-                salvarSessoes(); // atualiza o .csv na hora
+                salvarSessoes();
                 break;
             case 4:
                 relatorioComputadorMaisUsado();
@@ -453,7 +440,7 @@ void moduloSessoesRelatorios() {
                 buscarSessoesPorNomeCliente();
                 break;
             case 0:
-                salvarSessoes(); // grava os dados no arquivo antes de sair do modulo
+                salvarSessoes();
                 printf("\nRetornando ao menu principal...\n");
                 break;
             default:

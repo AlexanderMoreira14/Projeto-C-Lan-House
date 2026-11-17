@@ -11,10 +11,10 @@
 // 2. Perspectiva do Integrante B: Computadores da Lan House
 struct Computador {
     int idComputador;
-    char descricao[40]; // exemplo: PC Gamer 01
-    float valorHora; // preco cobrado por hora de uso
-    int ocupado; // 1 = Em uso, 0 = Livre
-    int ativo; // 1 = Ativo, 0 = Removido
+    char descricao[40];
+    float valorHora;
+    int ocupado;
+    int ativo;
 };
 
 struct Computador listaComputadores[50];
@@ -46,19 +46,17 @@ void cadastrarComputador() {
     if (totalComputadores >= 50) {
         printf("\n[ERRO] Limite de 50 computadores atingido!\n");
     } else {
-        // Mesmo raciocinio do cliente: a remocao e logica, entao o ID nao se repete.
         listaComputadores[totalComputadores].idComputador = totalComputadores + 1;
 
         printf("\nDescricao do computador (ex: PC Gamer 01): ");
         scanf(" %[^\n]", listaComputadores[totalComputadores].descricao);
-        // VALIDACAO: repete a pergunta ate digitar um valor maior que zero
         do {
             printf("Valor da hora (ex: 5,50): ");
-            listaComputadores[totalComputadores].valorHora = -1; // comeca invalido: se digitarem letra, pergunta de novo
+            listaComputadores[totalComputadores].valorHora = -1;
             scanf("%f", &listaComputadores[totalComputadores].valorHora);
-            while (getchar() != '\n') { } // joga fora o que sobrou digitado
+            while (getchar() != '\n') { }
         } while (listaComputadores[totalComputadores].valorHora <= 0);
-        listaComputadores[totalComputadores].ocupado = 0; // todo computador novo comeca livre
+        listaComputadores[totalComputadores].ocupado = 0;
         listaComputadores[totalComputadores].ativo = 1;
 
         printf("\nComputador cadastrado com sucesso! ID gerado: %d\n", listaComputadores[totalComputadores].idComputador);
@@ -135,7 +133,6 @@ void buscarComputadorPorDescricao() {
 
     printf("\n--- RESULTADO DA BUSCA ---\n");
     for (i = 0; i < totalComputadores; i++) {
-        // strstr procura o texto dentro da descricao: devolve NULL se nao encontrar
         if (listaComputadores[i].ativo == 1 && strstr(listaComputadores[i].descricao, texto) != NULL) {
             printf("ID: %d | %s | R$ %.2f por hora | Status: ",
                    listaComputadores[i].idComputador, listaComputadores[i].descricao,
@@ -174,12 +171,11 @@ void editarComputador() {
         printf("Novo valor da hora: ");
         scanf("%f", &listaComputadores[indice].valorHora);
 
-        // repete a pergunta ate o usuario digitar 0 ou 1
         do {
             printf("Status (0 = Livre, 1 = Em uso): ");
-            listaComputadores[indice].ocupado = -1; // comeca invalido: se digitarem letra, pergunta de novo
+            listaComputadores[indice].ocupado = -1;
             scanf("%d", &listaComputadores[indice].ocupado);
-            while (getchar() != '\n') { } // joga fora o que sobrou digitado
+            while (getchar() != '\n') { }
         } while (listaComputadores[indice].ocupado != 0 && listaComputadores[indice].ocupado != 1);
 
         printf("\nComputador atualizado com sucesso!\n");
@@ -239,10 +235,10 @@ void ordenarComputadoresPorValor() {
 // Autor: [Integrante B - João Felipe]
 // ----------------------------------------------------------------------------
 void salvarComputadores() {
-    FILE *arquivo; // ponteiro que representa o arquivo aberto
+    FILE *arquivo;
     int i;
 
-    arquivo = fopen("computadores.csv", "w"); // "w" = escrita: cria o arquivo ou apaga o conteudo antigo
+    arquivo = fopen("computadores.csv", "w");
 
     if (arquivo == NULL) {
         printf("\n[ERRO] Nao foi possivel salvar o arquivo computadores.csv!\n");
@@ -253,7 +249,7 @@ void salvarComputadores() {
                     listaComputadores[i].valorHora, listaComputadores[i].ocupado,
                     listaComputadores[i].ativo);
         }
-        fclose(arquivo); // sempre fechar o arquivo depois de usar
+        fclose(arquivo);
         printf("Dados salvos no arquivo computadores.csv\n");
     }
 }
@@ -266,15 +262,12 @@ void salvarComputadores() {
 void carregarComputadores() {
     FILE *arquivo;
 
-    arquivo = fopen("computadores.csv", "r"); // "r" = leitura
+    arquivo = fopen("computadores.csv", "r");
 
     if (arquivo == NULL) {
-        // na primeira vez o arquivo ainda nao existe, entao o sistema comeca vazio
         printf("Arquivo computadores.csv nao encontrado. Comecando sem dados.\n");
     } else {
         totalComputadores = 0;
-        // %[^;] = le tudo ate encontrar o ; (assim a descricao pode ter espacos)
-        // o while para quando o fscanf nao consegue mais ler os 5 campos (fim do arquivo)
         while (totalComputadores < 50 &&
                fscanf(arquivo, "%d;%[^;];%f;%d;%d\n",
                       &listaComputadores[totalComputadores].idComputador,
@@ -306,25 +299,25 @@ void moduloComputadores() {
         printf("7. Buscar Computador por Descricao\n");
         printf("0. Voltar ao Menu Principal\n");
         printf("Escolha uma acao: ");
-        opcaoComputador = -1; // comeca invalida: se digitarem uma letra, cai no default
+        opcaoComputador = -1;
         scanf("%d", &opcaoComputador);
-        while (getchar() != '\n') { } // joga fora o que sobrou digitado (letras e o Enter)
+        while (getchar() != '\n') { }
 
         switch (opcaoComputador) {
             case 1:
                 cadastrarComputador();
-                salvarComputadores(); // atualiza o .csv na hora
+                salvarComputadores();
                 break;
             case 2:
                 listarComputadores();
                 break;
             case 3:
                 editarComputador();
-                salvarComputadores(); // atualiza o .csv na hora
+                salvarComputadores();
                 break;
             case 4:
                 removerComputador();
-                salvarComputadores(); // atualiza o .csv na hora
+                salvarComputadores();
                 break;
             case 5:
                 buscarComputador();
@@ -336,7 +329,7 @@ void moduloComputadores() {
                 buscarComputadorPorDescricao();
                 break;
             case 0:
-                salvarComputadores(); // grava os dados no arquivo antes de sair do modulo
+                salvarComputadores();
                 printf("\nRetornando ao menu principal...\n");
                 break;
             default:

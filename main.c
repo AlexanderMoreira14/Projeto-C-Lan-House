@@ -1,7 +1,7 @@
 #include <stdio.h>
-#include <stdlib.h>  // para usar system("cls") na limparTela()
-#include <string.h>  // para usar strcmp e strstr
-#include <locale.h>  // para usar setlocale (portugues: virgula nos numeros decimais)
+#include <stdlib.h>
+#include <string.h>
+#include <locale.h>
 
 // ============================================================================
 // LAN HOUSE BYTE 2000 - CHECKPOINT 2
@@ -33,7 +33,7 @@
 // Autor: [Integrante A - Alexander Guimarães Gallotti Moreira, 47364548]
 // ----------------------------------------------------------------------------
 void limparTela() {
-    system("cls"); // "cls" e o comando do Windows que apaga tudo que esta na tela
+    system("cls");
 }
 
 // ----------------------------------------------------------------------------
@@ -54,10 +54,8 @@ void exibirCabecalho() {
 int main() {
     int opcaoPrincipal;
 
-    // deixa o programa em portugues: numeros decimais com virgula (ex: 5,50)
     setlocale(LC_ALL, "Portuguese");
 
-    // carrega os dados salvos nos arquivos .csv (se existirem)
     carregarClientes();
     carregarComputadores();
     carregarProdutos();
@@ -73,13 +71,13 @@ int main() {
         printf("0. Encerrar o Sistema\n");
         printf("------------------------------------------------------\n");
         printf("Digite a opcao desejada: ");
-        opcaoPrincipal = -1; // comeca invalida: se digitarem uma letra, cai no default
+        opcaoPrincipal = -1;
         scanf("%d", &opcaoPrincipal);
-        while (getchar() != '\n') { } // joga fora o que sobrou digitado (letras e o Enter)
+        while (getchar() != '\n') { }
 
         switch (opcaoPrincipal) {
             case 1:
-                limparTela(); // limpa a tela antes de abrir o submenu
+                limparTela();
                 moduloClientes();
                 break;
             case 2:
