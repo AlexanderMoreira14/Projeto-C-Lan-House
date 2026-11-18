@@ -157,8 +157,12 @@ void editarCliente() {
         scanf(" %[^\n]", listaClientes[indice].nome);
         printf("Novo telefone: ");
         scanf(" %[^\n]", listaClientes[indice].telefone);
-        printf("Novo saldo de horas: ");
-        scanf("%f", &listaClientes[indice].saldoHoras);
+        do {
+            printf("Novo saldo de horas (ex: 2,5): ");
+            listaClientes[indice].saldoHoras = -1;
+            scanf("%f", &listaClientes[indice].saldoHoras);
+            while (getchar() != '\n') { }
+        } while (listaClientes[indice].saldoHoras < 0);
         printf("\nCliente atualizado com sucesso!\n");
     }
 }
